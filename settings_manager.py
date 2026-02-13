@@ -15,12 +15,10 @@ class SettingsManager:
                     data = json.load(f)
                 self.lessons = data.get("lessons", DEFAULT_LESSONS[:])
                 self.max_lessons = data.get("max_lessons_per_class", DEFAULT_MAX_LESSONS.copy())
-                # добавить недостающие классы
-                for c in DEFAULT_MAX_LESSONS:
-                    if str(c) not in self.max_lessons:
-                        self.max_lessons[str(c)] = DEFAULT_MAX_LESSONS[str(c)]
-            except Exception:
-                pass
+                print("Настройки успешно загружены из", SETTINGS_FILE)  # временно для отладки
+            except Exception as e:
+                print(f"Ошибка загрузки {SETTINGS_FILE}: {e}")  # теперь вы увидите ошибку
+                # остаются значения по умолчанию
 
     def save(self):
         data = {

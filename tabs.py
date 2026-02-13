@@ -111,6 +111,8 @@ class ClassesTab(ttk.Frame):
         for c, var in self.vars.items():
             self.settings.update_max_lessons(c, var.get())
         messagebox.showinfo("Сохранение", "Настройки сохранены")
+        # 👇 Обновляем таблицу расписания сразу после изменения лимитов
+        self.app.refresh_schedule_display()
 
 class ScheduleTab(ttk.Frame):
     def __init__(self, parent, settings, schedule_mgr, app):
@@ -143,6 +145,12 @@ class ScheduleTab(ttk.Frame):
     def on_class_change(self, event=None):
         self.update_grid()
 
+    def clear(self):
+        if messagebox.askyesno("Очистка", "Очистить всё расписание?"):
+            for row in self.comboboxes:
+                for cb in row:
+                    cb.set('')
+    
     def update_grid(self):
         for w in self.grid_frame.winfo_children():
             w.destroy()
@@ -170,6 +178,7 @@ class ScheduleTab(ttk.Frame):
                 combo.grid(row=row, column=col+1, padx=2, pady=2)
                 row_combos.append(combo)
             self.comboboxes.append(row_combos)
+        print(f"Загружено расписание для класса {class_num}: {schedule}")
 
     def update_combobox_values(self):
         for row in self.comboboxes:
@@ -188,15 +197,22 @@ class ScheduleTab(ttk.Frame):
         messagebox.showinfo("Сохранение", f"Расписание для {class_num} класса сохранено")
 
     def load(self):
-        self.schedule_mgr.load()
-        self.update_grid()
-        messagebox.showinfo("Загрузка", "Расписание загружено из файла")
-
-    def clear(self):
-        if messagebox.askyesno("Очистка", "Очистить всё расписание?"):
-            for row in self.comboboxes:
-                for cb in row:
-                    cb.set('')
+        import os
+        import json
+        from config import SCHEDULES_FILE
+        if os.path.exists(SCHEDULES_FILE):
+            try:
+                with open(SCHEDULES_FILE, 'r', encoding='utf-8') as f:
+                    self.schedules = json.load(f)
+                self.schedule_mgr.load()          # загружаем данные из файла в менеджер
+                self.update_grid()                 # обновляем таблицу для текущего класса
+                print(f"✅ Расписание успешно загружено из {SCHEDULES_FILE}")
+            except Exception as e:
+                print(f"❌ ОШИБКА загрузки расписания: {e}")
+                self.schedules = {}
+        else:
+            print(f"ℹ️ Файл {SCHEDULES_FILE} не найден, будет создан при сохранении")
+            self.schedules = {}
 
 class PresetsTab(ttk.Frame):
     def __init__(self, parent, preset_mgr, schedule_mgr, settings, app):

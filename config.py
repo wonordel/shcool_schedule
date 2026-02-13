@@ -1,6 +1,11 @@
 import os
+import sys
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 SETTINGS_FILE = os.path.join(BASE_DIR, "settings.json")
 SCHEDULES_FILE = os.path.join(BASE_DIR, "schedules.json")
 PRESET_DIR = os.path.join(BASE_DIR, "preset")
@@ -14,3 +19,4 @@ DEFAULT_LESSONS = [
     "Биология", "История", "Обществознание", "География", "Английский язык",
     "Физкультура", "ИЗО", "Музыка", "Труд", "ОБЖ", "Информатика"
 ]
+

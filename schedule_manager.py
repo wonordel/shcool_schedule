@@ -8,12 +8,22 @@ class ScheduleManager:
         self.load()
 
     def load(self):
+        import os, json, traceback
+        print("▶️ load() вызван из:")
+        traceback.print_stack()
         if os.path.exists(SCHEDULES_FILE):
             try:
                 with open(SCHEDULES_FILE, 'r', encoding='utf-8') as f:
-                    self.schedules = json.load(f)
-            except Exception:
+                    data = json.load(f)
+                # Принудительно приводим ключи к строкам
+                self.schedules = {str(k): v for k, v in data.items()}
+                print("✅ Расписание успешно загружено")
+            except Exception as e:
+                print(f"❌ ОШИБКА загрузки расписания: {e}")
                 self.schedules = {}
+        else:
+            print("ℹ️ Файл не найден")
+            self.schedules = {}
 
     def save(self):
         with open(SCHEDULES_FILE, 'w', encoding='utf-8') as f:
